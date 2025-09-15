@@ -27,43 +27,6 @@
       text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
     }
 
-    .input-form {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .input-form input {
-      padding: 0.5rem;
-      border: 2px solid #a27bc1;
-      border-radius: 6px;
-      outline: none;
-      background: #3f4664;
-      color: #fff;
-    }
-
-    .input-form input::placeholder {
-      color: #bbb;
-    }
-
-    .input-form button {
-      padding: 0.5rem 1rem;
-      background: #a27bc1;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      color: #fff;
-      font-weight: bold;
-      transition: all 0.3s ease;
-    }
-
-    .input-form button:hover {
-      background: #8c63a7;
-      transform: translateY(-2px);
-    }
-
     table {
       border-collapse: collapse;
       width: 90%;
@@ -113,16 +76,9 @@
 </head>
 <body>
   <!-- Logo -->
-  <img src="e979e6c8-a6aa-4bcb-8f50-d62c3b8a16af.png" alt="DUBC Logo" class="logo"/>
+  <img src="e979e6c8-a6aa-4bcb-8f50-d62c3b8a16af.png" alt="Club Logo" class="logo"/>
 
   <h1>Rowing Erg League Table</h1>
-
-  <div class="input-form">
-    <input type="text" id="name" placeholder="Name" />
-    <input type="number" id="lastRank" placeholder="Last Erg Rank" min="1"/>
-    <input type="number" id="newRank" placeholder="New Erg Rank" min="1"/>
-    <button onclick="addRow()">Add Rower</button>
-  </div>
 
   <table id="leagueTable">
     <thead>
@@ -137,48 +93,54 @@
   </table>
 
   <script>
-    let rowers = [];
+    // Replace with your published Google Sheets CSV URL
+    const sheetUrl = "https://docs.google.com/spreadsheets/d/XXXXX/pub?output=csv";
 
-    function addRow() {
-      const name = document.getElementById('name').value.trim();
-      const lastRank = parseInt(document.getElementById('lastRank').value);
-      const newRank = parseInt(document.getElementById('newRank').value);
+    async function fetchData() {
+      try {
+        const response = await fetch(sheetUrl);
+        const data = await response.text();
+        const rows = data.split("\n").slice(1); // skip header row
 
-      if (!name || isNaN(lastRank) || isNaN(newRank)) {
-        alert("Please fill in all fields correctly.");
-        return;
+        let rowers = [];
+
+        rows.forEach(row => {
+          const [name, lastRank, newRank] = row.split(",");
+          if (!name) return;
+
+          const r = {
+            name: name.trim(),
+            lastRank: parseInt(lastRank),
+            newRank: parseInt(newRank)
+          };
+          rowers.push(r);
+        });
+
+        // sort by current rank
+        rowers.sort((a, b) => a.newRank - b.newRank);
+        renderTable(rowers);
+
+      } catch (err) {
+        console.error("Error fetching data:", err);
       }
-
-      // Store rower entry
-      rowers.push({ name, lastRank, newRank });
-      
-      // Sort by current rank (lowest is best)
-      rowers.sort((a, b) => a.newRank - b.newRank);
-
-      renderTable();
-
-      // Reset inputs
-      document.getElementById('name').value = "";
-      document.getElementById('lastRank').value = "";
-      document.getElementById('newRank').value = "";
     }
 
-    function renderTable() {
+    function renderTable(rowers) {
       const tableBody = document.querySelector("#leagueTable tbody");
       tableBody.innerHTML = "";
 
       rowers.forEach(r => {
-        const diff = r.lastRank - r.newRank; 
+        const diff = r.lastRank - r.newRank;
         let diffText, diffClass;
 
         if (diff > 0) {
-          diffText = `+${diff}`;
+          diffText = `⬆️ +${diff}`;
           diffClass = "up";
         } else if (diff < 0) {
-          diffText = `${diff}`;
+          diffText = `⬇️ ${diff}`;
           diffClass = "down";
         } else {
-          diffText = "0";
+          diffText = `➡️ 0`;
           diffClass = "same";
         }
 
@@ -192,6 +154,9 @@
         tableBody.appendChild(row);
       });
     }
+
+    fetchData();
   </script>
 </body>
 </html>
+
