@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rowing Erg League Table</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #363f5e, #2a3049);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .logo {
+      width: 180px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      color: #a27bc1;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+    }
+
+    .input-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .input-form input {
+      padding: 0.5rem;
+      border: 2px solid #a27bc1;
+      border-radius: 6px;
+      outline: none;
+      background: #3f4664;
+      color: #fff;
+    }
+
+    .input-form input::placeholder {
+      color: #bbb;
+    }
+
+    .input-form button {
+      padding: 0.5rem 1rem;
+      background: #a27bc1;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #fff;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .input-form button:hover {
+      background: #8c63a7;
+      transform: translateY(-2px);
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 90%;
+      max-width: 800px;
+      background: #2a3049;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0px 6px 25px rgba(0,0,0,0.5);
+      margin-top: 1rem;
+    }
+
+    th, td {
+      padding: 0.85rem 1rem;
+      text-align: center;
+    }
+
+    th {
+      background: #a27bc1;
+      color: #fff;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+    }
+
+    tr:nth-child(even) {
+      background: #3f4664;
+    }
+
+    tr:hover {
+      background: #50577a;
+    }
+
+    .up {
+      color: #4caf50; /* green */
+      font-weight: bold;
+    }
+
+    .same {
+      color: #ffeb3b; /* yellow */
+      font-weight: bold;
+    }
+
+    .down {
+      color: #f44336; /* red */
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <!-- Logo -->
+  <img src="e979e6c8-a6aa-4bcb-8f50-d62c3b8a16af.png" alt="DUBC Logo" class="logo"/>
+
+  <h1>Rowing Erg League Table</h1>
+
+  <div class="input-form">
+    <input type="text" id="name" placeholder="Name" />
+    <input type="number" id="lastRank" placeholder="Last Erg Rank" min="1"/>
+    <input type="number" id="newRank" placeholder="New Erg Rank" min="1"/>
+    <button onclick="addRow()">Add Rower</button>
+  </div>
+
+  <table id="leagueTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Last Erg Rank</th>
+        <th>New Erg Rank</th>
+        <th>Difference</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let rowers = [];
+
+    function addRow() {
+      const name = document.getElementById('name').value.trim();
+      const lastRank = parseInt(document.getElementById('lastRank').value);
+      const newRank = parseInt(document.getElementById('newRank').value);
+
+      if (!name || isNaN(lastRank) || isNaN(newRank)) {
+        alert("Please fill in all fields correctly.");
+        return;
+      }
+
+      // Store rower entry
+      rowers.push({ name, lastRank, newRank });
+      
+      // Sort by current rank (lowest is best)
+      rowers.sort((a, b) => a.newRank - b.newRank);
+
+      renderTable();
+
+      // Reset inputs
+      document.getElementById('name').value = "";
+      document.getElementById('lastRank').value = "";
+      document.getElementById('newRank').value = "";
+    }
+
+    function renderTable() {
+      const tableBody = document.querySelector("#leagueTable tbody");
+      tableBody.innerHTML = "";
+
+      rowers.forEach(r => {
+        const diff = r.lastRank - r.newRank; 
+        let diffText, diffClass;
+
+        if (diff > 0) {
+          diffText = `+${diff}`;
+          diffClass = "up";
+        } else if (diff < 0) {
+          diffText = `${diff}`;
+          diffClass = "down";
+        } else {
+          diffText = "0";
+          diffClass = "same";
+        }
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${r.name}</td>
+          <td>${r.lastRank}</td>
+          <td>${r.newRank}</td>
+          <td class="${diffClass}">${diffText}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+  </script>
+</body>
+</html>
